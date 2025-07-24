@@ -5,11 +5,12 @@
 
   tasks:
     - name: Apply Deployment manifest
-      community.kubernetes.k8s:
+      kubernetes.core.k8s:
         state: present
-        definition: "{{ lookup('file', 'k8s/deployment.yaml') }}"
+        src: k8s/deployment.yaml
 
     - name: Apply Service manifest
-      community.kubernetes.k8s:
+      kubernetes.core.k8s:
         state: present
-        definition: "{{ lookup('file', 'k8s/service.yaml') }}"
+        src: k8s/service.yaml
+
