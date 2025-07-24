@@ -2,17 +2,18 @@ pipeline {
   agent any
 
   tools {
-    // Make sure this matches the name you configured in Manage Jenkins → Global Tool Configuration
     maven 'Maven 3.8.7'
   }
 
   stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
     stage('Package Only') {
       steps {
-        // 1) Checkout your code from GitHub
-        checkout scm
-
-        // 2) Build the WAR without running tests
         sh 'mvn clean package -DskipTests'
       }
     }
@@ -20,7 +21,6 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         script {
-          // 3) Build & tag the Docker image using your Docker Hub namespace
           docker.build("yahelsable/app:${env.BUILD_NUMBER}", "-f Dockerfile .")
         }
       }
@@ -29,23 +29,32 @@ pipeline {
     stage('Push to Docker Hub') {
       steps {
         script {
-          // 4) Authenticate & push both the version tag and "latest"
           docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
             def img = docker.image("yahelsable/app:${env.BUILD_NUMBER}")
-            img.push()           // push the build-specific tag
-            img.push('latest')   // push the "latest" tag
+            img.push()           // versioned tag
+            img.push('latest')   // latest tag
           }
         }
+      }
+    }
+
+    stage('Deploy via Ansible') {
+      steps {
+        // Since Jenkins & Ansible live on the same EC2, we can run locally:
+        sh '''
+          ansible-playbook -i hosts.ini deploy-app.yml -c local \
+            --ssh-extra-args='-o StrictHostKeyChecking=no'
+        '''
       }
     }
   }
 
   post {
     success {
-      echo "Docker build & push completed for build ${env.BUILD_NUMBER}"
+      echo "Build, push & deploy succeeded!"
     }
     failure {
-      echo "Pipeline failed. Check the logs above for details."
+      echo "Something went wrong; check the console output."
     }
   }
 }
