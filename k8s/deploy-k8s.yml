@@ -1,23 +1,17 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: xyz-admin
-  labels:
-    app: xyz-admin
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: xyz-admin
-  template:
-    metadata:
-      labels:
-        app: xyz-admin
-    spec:
-      containers:
-      - name: xyz-admin
-        image: yahelsable/app:latest
-        ports:
-        - containerPort: 8080
+---
+- name: Deploy XYZ AdminModule on Kubernetes
+  hosts: docker_host
+  gather_facts: no
+
+  tasks:
+    - name: Apply Deployment manifest
+      kubernetes.core.k8s:
+        state: present
+        src: "{{ playbook_dir }}/deployment.yaml"
+
+    - name: Apply Service manifest
+      kubernetes.core.k8s:
+        state: present
+        src: "{{ playbook_dir }}/service.yaml"
 
 
