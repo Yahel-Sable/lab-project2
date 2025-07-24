@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xyz-admin
+  labels:
+    app: xyz-admin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: xyz-admin
+  template:
+    metadata:
+      labels:
+        app: xyz-admin
+    spec:
+      containers:
+        - name: xyz-admin
+          image: yahelsable/app:latest
+          ports:
+            - containerPort: 8080
