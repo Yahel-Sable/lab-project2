@@ -1,0 +1,38 @@
+---
+- name: Deploy XYZ AdminModule container
+  hosts: docker_host
+  become: true
+  vars:
+    image_name: yahelsable/app:latest
+    container_name: xyz_admin
+    host_port: 8081
+    container_port: 8080
+
+  tasks:
+    - name: Ensure Docker SDK for Python is installed
+      apt:
+        name: python3-docker
+        state: present
+        update_cache: yes
+
+    - name: Pull the latest image from Docker Hub
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        source: pull
+
+    - name: Stop & remove existing container (if any)
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        state: absent
+        force_kill: yes
+        remove_volume: no
+      ignore_errors: yes
+
+    - name: Run the container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ image_name }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ host_port }}:{{ container_port }}"
