@@ -15,7 +15,7 @@ spec:
         app: xyz-admin
     spec:
       containers:
-        - name: xyz-admin
-          image: yahelsable/app:latest
-          ports:
-            - containerPort: 8080
+      - name: xyz-admin
+        image: yahelsable/app:latest
+        ports:
+        - containerPort: 8080
