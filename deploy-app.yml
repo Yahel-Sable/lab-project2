@@ -5,7 +5,7 @@
   vars:
     image_name: yahelsable/app:latest
     container_name: xyz_admin
-    host_port: 8081
+    host_port: 8082
     container_port: 8080
 
   tasks:
